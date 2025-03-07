@@ -4,6 +4,7 @@ import { createStackNavigator } from '@react-navigation/stack';
 import { StyleSheet, Text, View, Button } from 'react-native';
 import WelcomeScreen from './app/screen/WelcomeScreen';
 import RangeScreen from './app/screen/RangeScreen';
+import ShotScreen from './app/screen/ShotScreen';
 
 const Stack = createStackNavigator();
 
@@ -14,6 +15,7 @@ export default function App() {
       <Stack.Navigator>
         <Stack.Screen name="Welcome" component={WelcomeScreen} />
         <Stack.Screen name="Range" component={RangeScreen} />
+        <Stack.Screen name = "Shot" component={ShotScreen} />
       </Stack.Navigator>
     </NavigationContainer>
   );

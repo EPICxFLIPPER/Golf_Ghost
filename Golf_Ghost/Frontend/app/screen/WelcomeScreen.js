@@ -10,6 +10,7 @@ const WelcomeScreen = ({ navigation }) => {
       <View style={styles.container}>
         <Text style={styles.text}>Welcome Screen!</Text>
         <Button title="Go to the range" onPress={() => navigation.navigate('Range')} />
+        <Button title="Hit a Shot" onPress={() => navigation.navigate('Shot')} />
       </View>
     );
   };

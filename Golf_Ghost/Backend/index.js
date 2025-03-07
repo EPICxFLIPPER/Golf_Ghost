@@ -1,16 +1,16 @@
 require('dotenv').config();
 const express = require('express');
 const cors = require('cors');
+const { Kysely, PostgresDialect } = require('kysely');
 const { Pool } = require('pg');
 
+// Set up Express
 const app = express();
 const PORT = process.env.PORT || 5000;
-
-// Middleware
 app.use(cors());
-app.use(express.json()); // Allow JSON requests
+app.use(express.json());
 
-// PostgreSQL Connection
+// Create a Postgres connection pool using `pg` driver
 const pool = new Pool({
   user: process.env.DB_USER,
   host: process.env.DB_HOST,
@@ -19,23 +19,57 @@ const pool = new Pool({
   port: process.env.DB_PORT || 5432,
 });
 
-// Test route
-app.get('/', (req, res) => {
-  res.send('Backend is running');
+// Set up Kysely with PostgresDialect
+const db = new Kysely({
+  dialect: new PostgresDialect({
+    pool: pool,
+  }),
 });
 
-// Example DB query
-app.get('/users', async (req, res) => {
+// Test route to check database connection with Kysely
+app.get('/test-db', async (req, res) => {
   try {
-    const result = await pool.query('SELECT * FROM users');
+    // Kysely query to fetch current time
+    const result = await db.raw('SELECT NOW() AS current_time');
     res.json(result.rows);
   } catch (error) {
     console.error(error);
-    res.status(500).json({ error: 'Internal Server Error' });
+    res.status(500).json({ error: 'Database connection failed' });
   }
 });
 
-// Start Server
+// Test route to use Kysely with table
+app.get('/get-users', async (req, res) => {
+  try {
+    // Assuming you have a "users" table, fetch all users
+    const users = await db.selectFrom('users').selectAll().execute();
+    res.json(users);
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ error: 'Error fetching users' });
+  }
+});
+
+app.post('/add-user', async (req, res) => {
+  const { name, email, age } = req.body;
+
+  try {
+    // Insert new user into the 'users' table
+    await db.insertInto('users')
+      .values({
+        name: name,
+        email: email,
+        age: age,
+      })
+      .execute();
+
+    res.status(201).json({ message: 'User added successfully!' });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ error: 'Error adding user' });
+  }
+});
+
 app.listen(PORT, () => {
-  console.log(`Server is running on http://localhost:${PORT}`);
+  console.log(`Server running on http://localhost:${PORT}`);
 });
